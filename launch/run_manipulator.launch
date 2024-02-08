@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<launch>
+  <rosparam file="$(find delta_2)/cfg/servo_settings.yaml" />
+  <rosparam file="$(find delta_2)/cfg/stewart_geometry.yaml" />
+  <node name="InverseKinematics" pkg="delta_2" type="kinematics_node.py" required="true" output="screen"/>
+  <node name="ServoController" pkg="delta_2" type="servo_controller.py" required="true" output="screen"/>
+</launch>

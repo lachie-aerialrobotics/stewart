@@ -1,0 +1,1130 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+<model name="stewart_platform">
+<%
+  #important geometry params (cut and paste from cfg/geometry.yaml)
+	RB = 0.09    #base radius
+  RP = 0.05    #platform radius
+  SB = 0.0165   #base joint offset
+  SP = 0.0375   #platform joint offset
+  PL = 0.12    #proximal link length
+  DL = 0.27069    #distal link length
+
+  #aesthetic geometry params:
+  BH = 0.04    #base height
+  PH = 0.01    #platform height
+
+  P_DIA = 0.02  #proximal diameter
+  D_DIA = 0.01  #distal diameter
+  P_M = 0.12 #proximal mass
+  D_M = 0.093 #distal mass
+  # D_M = 0.01 #distal mass
+  B_M = 0.9 #base mass
+  PL_M = 0.12 #platform mass
+
+  def box_inertia(x, y, z, mass)
+    ixx = 0.08333333 * mass * (y**2 + z**2)
+    iyy = 0.08333333 * mass * (x**2 + z**2)
+    izz = 0.08333333 * mass * (x**2 + y**2)
+    return ixx, iyy, izz
+  end 
+
+  def cylinder_inertia_z_aligned(r, h, mass)
+    ixx = 0.25 * mass * r**2 + 0.0833333 * mass * h**2
+    iyy = ixx
+    izz = 0.5 * mass * r**2
+    return ixx, iyy, izz
+  end 
+
+  def cylinder_inertia_x_aligned(r, h, mass)
+    izz = 0.25 * mass * r**2 + 0.0833333 * mass * h**2
+    iyy = izz
+    ixx = 0.5 * mass * r**2
+    return ixx, iyy, izz
+  end 
+
+  P_IXX, P_IYY, P_IZZ = box_inertia(PL, P_DIA, P_DIA, P_M)
+
+  # P_IXX = 0.5 * P_M * (0.5 * P_DIA)**2 
+  # P_IYY = 0.8333 * P_M * (3 * (0.5 * P_DIA)**2 + PL**2)
+  # P_IZZ = P_IYY
+
+  D_IXX, D_IYY, D_IZZ = cylinder_inertia_x_aligned(D_DIA/2, DL, D_M)
+
+  # D_IXX = 0.5 * D_M * (0.5 * D_DIA)**2 
+  # D_IYY = 0.8333 * D_M * (3 * (0.5 * D_DIA)**2 + DL**2)
+  # D_IZZ = D_IYY
+
+  B_IXX, B_IYY, B_IZZ = cylinder_inertia_z_aligned(RB, BH, B_M)
+
+  # B_IXX = 0.25 * B_M * RB**2
+  # B_IYY = B_IXX
+  # B_IZZ = 0.5 * B_M * RB**2
+
+  PL_IXX, PL_IYY, PL_IZZ = cylinder_inertia_z_aligned(RP, PH, PL_M)
+
+  # PL_IXX = 0.25 * B_M * RB**2
+  # PL_IYY = B_IXX
+  # PL_IZZ = 0.5 * B_M * RB**2
+  RN = 0.01
+  NH = 0.1
+  N_M = 0.05
+  N_IXX, N_IYY, N_IZZ = cylinder_inertia_z_aligned(RN, NH, N_M)
+
+  BETA_1 = 0.523599
+  BETA_2 = 0.523599
+  BETA_3 = 2.61799
+  BETA_4 = 2.61799
+  BETA_5 = 4.71239
+  BETA_6 = 4.71239
+
+  PROXIMAL_LINK_MIDPOINT_OFFSET = -0.5 * PL
+	DISTAL_LINK_MIDPOINT_OFFSET = -0.5 * DL
+
+  C30 = Math.cos(0.523599)
+  S30 = Math.sin(0.523599)
+
+	BASE_JOINT_1_POSE_X = RB * C30 + SB * S30
+  BASE_JOINT_1_POSE_Y = RB * S30 - SB * C30
+  BASE_JOINT_2_POSE_X = RB * C30 - SB * S30
+  BASE_JOINT_2_POSE_Y = RB * S30 + SB * C30
+  BASE_JOINT_3_POSE_X = -RB * C30 + SB * S30
+  BASE_JOINT_3_POSE_Y = RB * S30 + SB * C30
+  BASE_JOINT_4_POSE_X = -RB * C30 - SB * S30
+  BASE_JOINT_4_POSE_Y = RB * S30 - SB * C30
+  BASE_JOINT_5_POSE_X = -SB
+  BASE_JOINT_5_POSE_Y = -RB
+  BASE_JOINT_6_POSE_X = SB
+  BASE_JOINT_6_POSE_Y = -RB
+
+  PLATFORM_JOINT_1_POSE_X = RP * C30 + SP * S30
+  PLATFORM_JOINT_1_POSE_Y = RP * S30 - SP * C30
+  PLATFORM_JOINT_2_POSE_X = RP * C30 - SP * S30
+  PLATFORM_JOINT_2_POSE_Y = RP * S30 + SP * C30
+  PLATFORM_JOINT_3_POSE_X = -RP * C30 + SP * S30
+  PLATFORM_JOINT_3_POSE_Y = RP * S30 + SP * C30
+  PLATFORM_JOINT_4_POSE_X = -RP * C30 - SP * S30
+  PLATFORM_JOINT_4_POSE_Y = RP * S30 - SP * C30
+  PLATFORM_JOINT_5_POSE_X = -SP
+  PLATFORM_JOINT_5_POSE_Y = -RP
+  PLATFORM_JOINT_6_POSE_X = SP
+  PLATFORM_JOINT_6_POSE_Y = -RP
+
+  PROXIMAL_LINK_1_POSE_X = BASE_JOINT_1_POSE_X + 0.5 * PL * C30
+  PROXIMAL_LINK_1_POSE_Y = BASE_JOINT_1_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_2_POSE_X = BASE_JOINT_2_POSE_X + 0.5 * PL * C30
+  PROXIMAL_LINK_2_POSE_Y = BASE_JOINT_2_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_3_POSE_X = BASE_JOINT_3_POSE_X - 0.5 * PL * C30
+  PROXIMAL_LINK_3_POSE_Y = BASE_JOINT_3_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_4_POSE_X = BASE_JOINT_4_POSE_X - 0.5 * PL * C30
+  PROXIMAL_LINK_4_POSE_Y = BASE_JOINT_4_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_5_POSE_X = BASE_JOINT_5_POSE_X 
+  PROXIMAL_LINK_5_POSE_Y = BASE_JOINT_5_POSE_Y - 0.5 * PL
+  PROXIMAL_LINK_6_POSE_X = BASE_JOINT_6_POSE_X
+  PROXIMAL_LINK_6_POSE_Y = BASE_JOINT_6_POSE_Y - 0.5 * PL
+
+  DISTAL_JOINT_1_POSE_X = BASE_JOINT_1_POSE_X + PL * C30
+  DISTAL_JOINT_1_POSE_Y = BASE_JOINT_1_POSE_Y + PL * S30
+  DISTAL_JOINT_2_POSE_X = BASE_JOINT_2_POSE_X + PL * C30
+  DISTAL_JOINT_2_POSE_Y = BASE_JOINT_2_POSE_Y + PL * S30
+  DISTAL_JOINT_3_POSE_X = BASE_JOINT_3_POSE_X - PL * C30
+  DISTAL_JOINT_3_POSE_Y = BASE_JOINT_3_POSE_Y + PL * S30
+  DISTAL_JOINT_4_POSE_X = BASE_JOINT_4_POSE_X - PL * C30
+  DISTAL_JOINT_4_POSE_Y = BASE_JOINT_4_POSE_Y + PL * S30
+  DISTAL_JOINT_5_POSE_X = BASE_JOINT_5_POSE_X 
+  DISTAL_JOINT_5_POSE_Y = BASE_JOINT_5_POSE_Y - PL
+  DISTAL_JOINT_6_POSE_X = BASE_JOINT_6_POSE_X
+  DISTAL_JOINT_6_POSE_Y = BASE_JOINT_6_POSE_Y - PL
+
+  PLATFORM_LINK_POSE_Z = Math.sqrt(DL**2 - (SB - SP)**2 - (RP - RB - PL)**2)
+
+  L_X1 = PLATFORM_JOINT_1_POSE_X - DISTAL_JOINT_1_POSE_X
+  L_Y1 = PLATFORM_JOINT_1_POSE_Y - DISTAL_JOINT_1_POSE_Y
+  L_Z1 = PLATFORM_LINK_POSE_Z
+  L_X2 = PLATFORM_JOINT_2_POSE_X - DISTAL_JOINT_2_POSE_X
+  L_Y2 = PLATFORM_JOINT_2_POSE_Y - DISTAL_JOINT_2_POSE_Y
+  L_Z2 = PLATFORM_LINK_POSE_Z
+  L_X3 = PLATFORM_JOINT_3_POSE_X - DISTAL_JOINT_3_POSE_X
+  L_Y3 = PLATFORM_JOINT_3_POSE_Y - DISTAL_JOINT_3_POSE_Y
+  L_Z3 = PLATFORM_LINK_POSE_Z
+  L_X4 = PLATFORM_JOINT_4_POSE_X - DISTAL_JOINT_4_POSE_X
+  L_Y4 = PLATFORM_JOINT_4_POSE_Y - DISTAL_JOINT_4_POSE_Y
+  L_Z4 = PLATFORM_LINK_POSE_Z
+  L_X5 = PLATFORM_JOINT_5_POSE_X - DISTAL_JOINT_5_POSE_X
+  L_Y5 = PLATFORM_JOINT_5_POSE_Y - DISTAL_JOINT_5_POSE_Y
+  L_Z5 = PLATFORM_LINK_POSE_Z
+  L_X6 = PLATFORM_JOINT_6_POSE_X - DISTAL_JOINT_6_POSE_X
+  L_Y6 = PLATFORM_JOINT_6_POSE_Y - DISTAL_JOINT_6_POSE_Y
+  L_Z6 = PLATFORM_LINK_POSE_Z
+
+  DISTAL_LINK_1_POSE_X = DISTAL_JOINT_1_POSE_X + 0.5 * L_X1
+  DISTAL_LINK_1_POSE_Y = DISTAL_JOINT_1_POSE_Y + 0.5 * L_Y1
+  DISTAL_LINK_1_POSE_Z = 0.5 * L_Z1 
+  DISTAL_LINK_2_POSE_X = DISTAL_JOINT_2_POSE_X + 0.5 * L_X2
+  DISTAL_LINK_2_POSE_Y = DISTAL_JOINT_2_POSE_Y + 0.5 * L_Y2
+  DISTAL_LINK_2_POSE_Z = 0.5 * L_Z2 
+  DISTAL_LINK_3_POSE_X = DISTAL_JOINT_3_POSE_X + 0.5 * L_X3
+  DISTAL_LINK_3_POSE_Y = DISTAL_JOINT_3_POSE_Y + 0.5 * L_Y3
+  DISTAL_LINK_3_POSE_Z = 0.5 * L_Z3 
+  DISTAL_LINK_4_POSE_X = DISTAL_JOINT_4_POSE_X + 0.5 * L_X4
+  DISTAL_LINK_4_POSE_Y = DISTAL_JOINT_4_POSE_Y + 0.5 * L_Y4
+  DISTAL_LINK_4_POSE_Z = 0.5 * L_Z4
+  DISTAL_LINK_5_POSE_X = DISTAL_JOINT_5_POSE_X + 0.5 * L_X5
+  DISTAL_LINK_5_POSE_Y = DISTAL_JOINT_5_POSE_Y + 0.5 * L_Y5
+  DISTAL_LINK_5_POSE_Z = 0.5 * L_Z5
+  DISTAL_LINK_6_POSE_X = DISTAL_JOINT_6_POSE_X + 0.5 * L_X6
+  DISTAL_LINK_6_POSE_Y = DISTAL_JOINT_6_POSE_Y + 0.5 * L_Y6
+  DISTAL_LINK_6_POSE_Z = 0.5 * L_Z6
+
+  DISTAL_ROTATION_Z = Math.atan((SB - SP) / (RP - RB - PL))
+  DISTAL_ROTATION_Y = Math.atan((PLATFORM_LINK_POSE_Z) / (RB + PL - RP))
+  DISTAL_ROTATION_X = Math.atan((PLATFORM_LINK_POSE_Z) / (SB - SP))
+
+  JOINT_FRICTION = 0.1
+  JOINT_DAMPING = 0.00001
+%>	
+  <plugin name="joint_controller" filename="libjoint_controller.so"/>
+
+  <joint name="proximal_link_1_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_1</child>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+			<xyz><%= S30 %> <%= -C30 %> 0</xyz>
+      <limit>
+				<lower> -0.785398 </lower>
+				<upper> 1.57079 </upper>
+				<velocity> 1 </velocity>
+			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+	</joint>
+
+  <joint name="proximal_link_2_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_2</child>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+			<xyz><%= S30 %> <%= -C30 %> 0</xyz>
+      <limit>
+				<lower> -0.785398 </lower>
+				<upper> 1.57079 </upper>
+				<velocity> 1 </velocity>
+			</limit>
+      <dynamics>
+        <damping><%= JOINT_DAMPING %></damping>
+        <friction><%= JOINT_FRICTION %></friction>
+      </dynamics>
+		</axis>
+	</joint>
+
+	<joint name="proximal_link_3_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_3</child>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+			<xyz><%= S30 %> <%= C30 %> 0</xyz>
+      <limit>
+				<lower> -0.785398 </lower>
+				<upper> 1.57079 </upper>
+				<velocity> 1 </velocity>
+			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+	</joint>
+
+  <joint name="proximal_link_4_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_4</child>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+			<xyz><%= S30 %> <%= C30 %> 0</xyz>
+      <limit>
+				<lower> -0.785398 </lower>
+				<upper> 1.57079 </upper>
+				<velocity> 1 </velocity>
+			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+	</joint>
+
+	<joint name="proximal_link_5_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_5</child>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+			<xyz>-1 0 0</xyz>
+      <limit>
+				<lower> -0.785398 </lower>
+				<upper> 1.57079 </upper>
+				<velocity> 1 </velocity>
+			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+	</joint>
+
+  <joint name="proximal_link_6_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_6</child>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+			<xyz>-1 0 0</xyz>
+      <limit>
+				<lower> -0.785398 </lower>
+				<upper> 1.57079 </upper>
+				<velocity> 1 </velocity>
+			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+	</joint>
+
+  <joint name="distal_link_1_joint" type="ball">
+		<parent>proximal_link_1</parent>
+		<child>distal_link_1</child>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+    <xyz>0 0 1</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+    <axis2>
+    <xyz>0 1 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis2>
+	</joint>
+
+  <joint name="distal_link_2_joint" type="ball">
+		<parent>proximal_link_2</parent>
+		<child>distal_link_2</child>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+    <xyz>0 0 1</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+    <axis2>
+    <xyz>0 1 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis2>
+	</joint>
+
+  <joint name="distal_link_3_joint" type="ball">
+		<parent>proximal_link_3</parent>
+		<child>distal_link_3</child>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+    <xyz>0 0 1</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+    <axis2>
+    <xyz>0 1 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis2>
+	</joint>
+
+  <joint name="distal_link_4_joint" type="ball">
+		<parent>proximal_link_4</parent>
+		<child>distal_link_4</child>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+    <xyz>0 0 1</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+    <axis2>
+    <xyz>0 1 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis2>
+	</joint>
+
+  <joint name="distal_link_5_joint" type="ball">
+		<parent>proximal_link_5</parent>
+		<child>distal_link_5</child>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+    <xyz>0 0 1</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+    <axis2>
+    <xyz>0 1 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis2>
+	</joint>
+
+  <joint name="distal_link_6_joint" type="ball">
+		<parent>proximal_link_6</parent>
+		<child>distal_link_6</child>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<axis>
+    <xyz>0 0 1</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
+    <axis2>
+    <xyz>0 1 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis2>
+	</joint>
+
+  <joint name="platform_link_1_joint" type="ball">
+		<parent>distal_link_1</parent>
+		<child>platform_link</child>
+		<pose><%= PLATFORM_JOINT_1_POSE_X %> <%= PLATFORM_JOINT_1_POSE_Y %> 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_2_joint" type="ball">
+		<parent>distal_link_2</parent>
+		<child>platform_link</child>
+		<pose><%= PLATFORM_JOINT_2_POSE_X %> <%= PLATFORM_JOINT_2_POSE_Y %> 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_3_joint" type="ball">
+		<parent>distal_link_3</parent>
+		<child>platform_link</child>
+		<pose><%= PLATFORM_JOINT_3_POSE_X %> <%= PLATFORM_JOINT_3_POSE_Y %> 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_4_joint" type="ball">
+		<parent>distal_link_4</parent>
+		<child>platform_link</child>
+		<pose><%= PLATFORM_JOINT_4_POSE_X %> <%= PLATFORM_JOINT_4_POSE_Y %> 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_5_joint" type="ball">
+		<parent>distal_link_5</parent>
+		<child>platform_link</child>
+		<pose><%= PLATFORM_JOINT_5_POSE_X %> <%= PLATFORM_JOINT_5_POSE_Y %> 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_6_joint" type="ball">
+		<parent>distal_link_6</parent>
+		<child>platform_link</child>
+		<pose><%= PLATFORM_JOINT_6_POSE_X %> <%= PLATFORM_JOINT_6_POSE_Y %> 0 0 0 0</pose>
+  </joint>
+
+  <joint name="nozzle_joint" type="fixed">
+		<parent>platform_link</parent>
+		<child>nozzle</child>
+		<pose>0 0 0 0 0 0</pose>
+	</joint>
+
+  <link name="nozzle">
+    <pose>0 0 <%= PLATFORM_LINK_POSE_Z + 0.5 * BH + NH / 2 %> 0 0 0</pose>
+    <inertial>
+    <mass><%= N_M %></mass>
+    <inertia>
+      <ixx><%= N_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= N_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= N_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <!-- <collision name="collision">
+      <geometry>
+        <cylinder>
+          <radius><%= RN %></radius>
+          <length><%= NH %></length>
+        </cylinder> 
+      </geometry>
+    </collision> -->
+    <visual name="visual">
+    <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius><%= RN %></radius>
+          <length><%= NH %></length>
+        </cylinder>
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="base_link">
+    <pose>0 0 <%= 0.5 * BH %> 0 0 0</pose>
+    <inertial>
+    <mass><%= B_M %></mass>
+    <inertia>
+      <ixx><%= B_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= B_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= B_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <cylinder>
+          <radius><%= Math.sqrt(RB**2 + SB**2) %></radius>
+          <length><%= BH %></length>
+        </cylinder> 
+      </geometry>
+    </collision>
+    <visual name="visual">
+    <pose>-0.124 0.105 -0.02 0 0 -1.5708</pose>
+      <geometry>
+        <!-- <cylinder> -->
+          <!-- <radius><%= Math.sqrt(RB**2 + SB**2) %></radius> -->
+          <!-- <length><%= BH %></length> -->
+        <!-- </cylinder> --> 
+        <mesh>
+          <uri>model://stewart_platform/meshes/Stuart_base.dae</uri>
+          <scale> 0.001 0.001 0.001 </scale>
+        </mesh>
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="proximal_link_1">
+    <pose><%= PROXIMAL_LINK_1_POSE_X %> <%= PROXIMAL_LINK_1_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_1 %></pose>
+    <inertial>
+      <mass><%= P_M %></mass>
+      <inertia>
+        <ixx><%= P_IXX %></ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy><%= P_IYY %></iyy> 
+        <iyz>0.0</iyz>
+        <izz><%= P_IZZ %></izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="proximal_link_2">
+    <pose><%= PROXIMAL_LINK_2_POSE_X %> <%= PROXIMAL_LINK_2_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_2 %></pose>
+    <inertial>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="proximal_link_3">
+    <pose><%= PROXIMAL_LINK_3_POSE_X %> <%= PROXIMAL_LINK_3_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_3 %></pose>
+    <inertial>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="proximal_link_4">
+    <pose><%= PROXIMAL_LINK_4_POSE_X %> <%= PROXIMAL_LINK_4_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_4 %></pose>
+    <inertial>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="proximal_link_5">
+    <pose><%= PROXIMAL_LINK_5_POSE_X %> <%= PROXIMAL_LINK_5_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_5 %></pose>
+    <inertial>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="proximal_link_6">
+    <pose><%= PROXIMAL_LINK_6_POSE_X %> <%= PROXIMAL_LINK_6_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_6 %></pose>
+    <inertial>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="distal_link_1">
+    <gravity>false</gravity>
+    <pose><%= DISTAL_LINK_1_POSE_X %> <%= DISTAL_LINK_1_POSE_Y %> <%= DISTAL_LINK_1_POSE_Z + 0.5 * BH %> <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_1 + DISTAL_ROTATION_Z %></pose>
+    <inertial>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <pose> 0 0 0 0 <%= 3.1415 / 2 %> 0 </pose>
+      <geometry>
+        <cylinder>
+          <radius><%= D_DIA / 2 %></radius>
+          <length><%= DL %></length>
+        </cylinder> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="distal_link_2">
+  <gravity>false</gravity>
+    <pose><%= DISTAL_LINK_2_POSE_X %> <%= DISTAL_LINK_2_POSE_Y %> <%= DISTAL_LINK_2_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_2 - DISTAL_ROTATION_Z %></pose>
+    <inertial>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <pose> 0 0 0 0 <%= 3.1415 / 2 %> 0 </pose>
+      <geometry>
+        <cylinder>
+          <radius><%= D_DIA / 2 %></radius>
+          <length><%= DL %></length>
+        </cylinder> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="distal_link_3">
+  <gravity>false</gravity>
+    <pose><%= DISTAL_LINK_3_POSE_X %> <%= DISTAL_LINK_3_POSE_Y %> <%= DISTAL_LINK_3_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_3 + DISTAL_ROTATION_Z %></pose>
+    <inertial>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <pose> 0 0 0 0 <%= 3.1415 / 2 %> 0 </pose>
+      <geometry>
+        <cylinder>
+          <radius><%= D_DIA / 2 %></radius>
+          <length><%= DL %></length>
+        </cylinder> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="distal_link_4">
+  <gravity>false</gravity>
+    <pose><%= DISTAL_LINK_4_POSE_X %> <%= DISTAL_LINK_4_POSE_Y %> <%= DISTAL_LINK_4_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_4 - DISTAL_ROTATION_Z %></pose>
+    <inertial>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <pose> 0 0 0 0 <%= 3.1415 / 2 %> 0 </pose>
+      <geometry>
+        <cylinder>
+          <radius><%= D_DIA / 2 %></radius>
+          <length><%= DL %></length>
+        </cylinder> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="distal_link_5">
+  <gravity>false</gravity>
+    <pose><%= DISTAL_LINK_5_POSE_X %> <%= DISTAL_LINK_5_POSE_Y %> <%= DISTAL_LINK_5_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_5 + DISTAL_ROTATION_Z %></pose>
+    <inertial>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <pose> 0 0 0 0 <%= 3.1415 / 2 %> 0 </pose>
+      <geometry>
+        <cylinder>
+          <radius><%= D_DIA / 2 %></radius>
+          <length><%= DL %></length>
+        </cylinder> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="distal_link_6">
+  <gravity>false</gravity>
+    <pose><%= DISTAL_LINK_6_POSE_X %> <%= DISTAL_LINK_6_POSE_Y %> <%= DISTAL_LINK_6_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_6 - DISTAL_ROTATION_Z %></pose>
+    <inertial>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <pose> 0 0 0 0 <%= 3.1415 / 2 %> 0 </pose>
+      <geometry>
+        <cylinder>
+          <radius><%= D_DIA / 2 %></radius>
+          <length><%= DL %></length>
+        </cylinder> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <link name="platform_link">
+  <gravity>false</gravity>
+    <pose>0 0 <%= PLATFORM_LINK_POSE_Z + 0.5 * BH %> 0 0 0</pose>
+    <inertial>
+    <mass><%= PL_M %></mass>
+    <inertia>
+      <ixx><%= PL_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= PL_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= PL_IZZ %></izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <cylinder>
+          <radius><%= Math.sqrt(RP**2 + SP**2) %></radius>
+          <length><%= PH %></length>
+        </cylinder>  
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <cylinder>
+          <radius><%= Math.sqrt(RP**2 + SP**2) %></radius>
+          <length><%= PH %></length>
+        </cylinder> 
+      </geometry>
+      <material>
+      <script>
+        <name>Gazebo/DarkGrey</name>
+        <uri>file://media/materials/scripts/gazebo.material</uri>
+      </script>
+      <shader type='pixel'>
+        <normal_map>__default__</normal_map>
+      </shader>
+      <ambient>0.175 0.175 0.175 1</ambient>
+      <diffuse>0.175 0.175 0.175 1</diffuse>
+      <specular>0.175 0.175 0.175 1</specular>
+      <emissive>0 0 0 1</emissive>
+    </material>
+    </visual>
+  </link>
+
+  <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+  <alwaysOn>true</alwaysOn>
+  <updateRate>100.0</updateRate>
+  <bodyName>platform_link</bodyName>
+  <topicName>ground_truth/tooltip</topicName>
+  <gaussianNoise>0.0</gaussianNoise>
+  <frameName>map</frameName>
+  <xyzOffsets>0 0 0</xyzOffsets>
+  <rpyOffsets>0 0 0</rpyOffsets>
+</plugin>
+</model>
+</sdf>
