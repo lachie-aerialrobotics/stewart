@@ -12,7 +12,7 @@ The inverse kinematics equations are taken from https://www.cambridge.org/core/j
 Clone this repo in your workspace and build:
 ```
 cd ~/aam_ws/src
-git clone https://github.com/lachie-aerialrobotics/delta_2.git
+git clone https://github.com/lachie-aerialrobotics/stewart.git
 catkin build
 ```
 To test in gazebo, first update any changes to the .sdf:
@@ -30,13 +30,13 @@ make
 ```
 Add the following lines to `~/.bashrc`
 ```
-export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:~/aam_ws/src/delta_2/gazebo/plugin/build
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/aam_ws/src/delta_2/gazebo/models
+export GAZEBO_PLUGIN_PATH=$GAZEBO_PLUGIN_PATH:~/aam_ws/src/stewart/gazebo/plugin/build
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:~/aam_ws/src/stewart/gazebo/models
 ```
 
 Then run the simulation:
 ```
-roslaunch delta_2 sim_manipulator.launch
+roslaunch stewart sim_manipulator.launch
 ```
 Use dynamic reconfigure to send setpoints to the manipulator
 

@@ -1,7 +1,7 @@
 import numpy as np
 
 from geometry_msgs.msg import PoseStamped, WrenchStamped, TransformStamped
-from delta_2.msg import ServoAnglesStamped
+from stewart.msg import ServoAnglesStamped
 from tf.transformations import quaternion_from_euler, euler_from_quaternion    
 
 

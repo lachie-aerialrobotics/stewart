@@ -5,7 +5,7 @@ from geometry_msgs.msg import PoseStamped, TwistStamped
 from tf.transformations import quaternion_from_euler
 
 from dynamic_reconfigure.server import Server
-from delta_2.cfg import TestSetpointConfig
+from stewart.cfg import TestSetpointConfig
 
 def config_callback(config, level): 
     q = quaternion_from_euler(np.deg2rad(config.psi), np.deg2rad(config.theta), np.deg2rad(config.phi))

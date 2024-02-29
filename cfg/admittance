@@ -1,0 +1,27 @@
+!!python/object/new:dynamic_reconfigure.encoding.Config
+dictitems:
+  D: 0
+  I: 0
+  P: 1000
+  disable_movement: false
+  groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+    dictitems:
+      D: 0
+      I: 0
+      P: 1000
+      disable_movement: false
+      groups: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      id: 0
+      name: Default
+      parameters: !!python/object/new:dynamic_reconfigure.encoding.Config
+        state: []
+      parent: 0
+      read_positions: true
+      state: true
+      type: ''
+      vel_limit: 0
+    state: []
+  read_positions: true
+  vel_limit: 0
+state: []

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 set(CMAKE_CXX_STANDARD 17)
 
-project(delta_2)
+project(stewart)
 
 find_package(roscpp REQUIRED)
 find_package(std_msgs REQUIRED)

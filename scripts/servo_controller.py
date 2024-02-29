@@ -13,10 +13,10 @@
 
 import rospy
 import numpy as np
-from delta_2.msg import ServoAnglesStamped
+from stewart.msg import ServoAnglesStamped
 from dynamixel_sdk import *
 from dynamic_reconfigure.server import Server
-from delta_2.cfg import ServoConfig
+from stewart.cfg import ServoConfig
 
 def Initialise():
     rospy.loginfo("INITIALISING DYNAMIXELS.......")
@@ -83,6 +83,7 @@ class ServoController:
         srv = Server(ServoConfig, self.config_callback)
         
         self.pos_pub = rospy.Publisher('/servo_detected/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True) # servo angle publisher
+        self.torque_pub = rospy.Publisher('/servo_detected/torque', ServoAnglesStamped, queue_size=1, tcp_nodelay=True) # servo torque publisher
         servo_pos_sub = rospy.Subscriber('/servo_setpoint/positions', ServoAnglesStamped, self.pos_sp_callback, queue_size=1, tcp_nodelay=True) #target angle subscriber
         servo_vel_sub = rospy.Subscriber('/servo_setpoint/velocities', ServoAnglesStamped, self.vel_sp_callback, queue_size=1, tcp_nodelay=True) #target vel subscriber
         # servo_acc_sub = rospy.Subscriber('/servo_setpoint/accels', ServoAnglesStamped, self.acc_sp_callback, tcp_nodelay=True) #target acc subscriber

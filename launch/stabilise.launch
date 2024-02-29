@@ -5,21 +5,22 @@
 
     <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="transform_base_link2stewart_base" args="0.34 0 0.1 1.5708 0 1.5708 base_link stewart_base" /> -->
 
-    <rosparam file="$(find delta_2)/cfg/servo_settings.yaml" />
-    <rosparam file="$(find delta_2)/cfg/stewart_geometry.yaml" />
-    
+    <rosparam file="$(find stewart)/cfg/servo_settings.yaml" />
+    <rosparam file="$(find stewart)/cfg/stewart_geometry.yaml" />
+
+
+    <group unless="$(arg sim)">
+        <node name="ServoController" pkg="stewart" type="servo_controller.py" required="true" output="screen"/>
+    </group>
     <group if="$(arg sim)">
         <arg name="model_name" default="stewart_platform"/>
         <param name="model_name" value="$(arg model_name)" />
-        
-        <node name="ServoController" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
+        <node name="ServoController" pkg="stewart" type="publish_sim_joints.py" required="true" output="screen"/>
+        <remap from="/servo_setpoint/positions" to="/servo_detected/positions" />
     </group>
 
-    <group unless="$(arg sim)">
-        <node name="ServoController" pkg="delta_2" type="servo_controller.py" required="true" output="screen"/>
-    </group>
     
-    <remap from="/servo_setpoint/positions" to="/servo_detected/positions" />
-    <node name="InverseKinematics" pkg="delta_2" type="kinematics_node.py" required="true" output="screen"/>
-    <node name="Stabilisation" pkg="delta_2" type="stabilisation.py" required="true" output="screen"/>
+
+    <node name="InverseKinematics" pkg="stewart" type="kinematics_node.py" required="true" output="screen"/>
+    
 </launch>

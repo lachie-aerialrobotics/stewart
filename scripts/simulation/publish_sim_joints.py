@@ -2,7 +2,7 @@
 import rospy
 import numpy as np
 from std_msgs.msg import Float32MultiArray, MultiArrayLayout
-from delta_2.msg import ServoAnglesStamped
+from stewart.msg import ServoAnglesStamped
 
 class SimConverter:
     def __init__(self):
