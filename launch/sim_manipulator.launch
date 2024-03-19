@@ -14,7 +14,7 @@
     <node name="ServoController" pkg="stewart" type="publish_sim_joints.py" required="true" output="screen"/>
     <remap from="/servo_setpoint/positions" to="/servo_detected/positions" />
 
-    <node pkg="tf2_ros" type="static_transform_pu1blisher" name="transform_map2base" args="0 0 0 0 0 0 map stewart_base" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="transform_map2base" args="0 0 0 0 0 0 map stewart_base" />
     
     <node name="TestSetpoints" pkg="stewart" type="test_setpoint_publisher.py" required="true" output="screen"/>
 

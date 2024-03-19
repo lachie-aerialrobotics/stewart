@@ -16,11 +16,17 @@
 
   P_DIA = 0.02  #proximal diameter
   D_DIA = 0.01  #distal diameter
-  P_M = 0.12 #proximal mass
-  D_M = 0.093 #distal mass
-  # D_M = 0.01 #distal mass
-  B_M = 0.9 #base mass
+  # P_M = 0.12 #proximal mass
+  P_M = 0.02
+  # D_M = 0.093 #distal mass
+  D_M = 0.05 #distal mass
+  # B_M = 0.9 #base mass
+  B_M = 0.1
+  
   PL_M = 0.12 #platform mass
+
+  JOINT_FRICTION = 0.04
+  JOINT_DAMPING = 0.4
 
   def box_inertia(x, y, z, mass)
     ixx = 0.08333333 * mass * (y**2 + z**2)
@@ -66,9 +72,9 @@
   # PL_IXX = 0.25 * B_M * RB**2
   # PL_IYY = B_IXX
   # PL_IZZ = 0.5 * B_M * RB**2
-  RN = 0.01
+  RN = 0.02
   NH = 0.1
-  N_M = 0.05
+  N_M = 0.1
   N_IXX, N_IYY, N_IZZ = cylinder_inertia_z_aligned(RN, NH, N_M)
 
   BETA_1 = 0.523599
@@ -180,8 +186,6 @@
   DISTAL_ROTATION_Y = Math.atan((PLATFORM_LINK_POSE_Z) / (RB + PL - RP))
   DISTAL_ROTATION_X = Math.atan((PLATFORM_LINK_POSE_Z) / (SB - SP))
 
-  JOINT_FRICTION = 0.1
-  JOINT_DAMPING = 0.00001
 %>	
   <plugin name="joint_controller" filename="libjoint_controller.so"/>
 

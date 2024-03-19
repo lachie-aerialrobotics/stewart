@@ -13,7 +13,7 @@
         <node name="ServoController" pkg="stewart" type="servo_controller.py" required="true" output="screen"/>
     </group>
     <group if="$(arg sim)">
-        <arg name="model_name" default="stewart_platform"/>
+        <arg name="model_name" default="hex_stewart"/>
         <param name="model_name" value="$(arg model_name)" />
         <node name="ServoController" pkg="stewart" type="publish_sim_joints.py" required="true" output="screen"/>
         <remap from="/servo_setpoint/positions" to="/servo_detected/positions" />
