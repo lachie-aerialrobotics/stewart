@@ -79,7 +79,6 @@ class Stabilisation:
         #init publishers and subscribers
         self.pub_platform_pose = rospy.Publisher('/platform_setpoint/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         self.pub_platform_state = rospy.Publisher('/manipulator/state', String, queue_size=1, tcp_nodelay=True)
-        # rospy.Subscriber('/manipulator/state', String, self.state_callback, queue_size=1, tcp_nodelay=True) 
         rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.drone_pose_callback, queue_size=1, tcp_nodelay=True)
         rospy.Subscriber('/tooltip_setpoint/pose', PoseStamped, self.tooltip_pose_callback, queue_size=1, tcp_nodelay=True)
         # rospy.Subscriber('/tooltip_setpoint/velocity', TwistStamped, self.tooltip_twist_callback, queue_size=1, tcp_nodelay=True)
@@ -96,8 +95,8 @@ class Stabilisation:
         tip_tf_msg = cvs.PoseStamped2TransformStamped(tip_pose_msg, child_frame_id='tooltip_sp_r')
         self.tfBroadcaster.sendTransform(tip_tf_msg)
 
-        rot = self.tfBuffer.lookup_transform('base_link', 'stewart_base', time=tip_pose_msg.header.stamp, timeout=rospy.Duration(0.1))
-        flat_ref = self.tfBuffer.lookup_transform('map', 'platform_sp', time=tip_pose_msg.header.stamp, timeout=rospy.Duration(0.1))      
+        rot = self.tfBuffer.lookup_transform('base_link', 'stewart_base', time=rospy.Time(0.), timeout=rospy.Duration(0.1))
+        flat_ref = self.tfBuffer.lookup_transform('map', 'platform_sp', time=rospy.Time(0.), timeout=rospy.Duration(0.1))      
         flat_ref = make_flat_tooltip(flat_ref, rot)
         self.tfBroadcaster.sendTransform(flat_ref)
 
@@ -109,9 +108,6 @@ class Stabilisation:
         drone_pose_flat = make_flat_drone(drone_pose_msg)
         drone_transform_flat = cvs.PoseStamped2TransformStamped(drone_pose_flat, child_frame_id='base_link_flat')
         self.tfBroadcaster.sendTransform(drone_transform_flat)
-
-
-        
 
 
         if self.mavros_state == 'OFFBOARD':
@@ -137,7 +133,7 @@ class Stabilisation:
             target = 'workspace_center'
 
         try:
-            self.t = self.tfBuffer.lookup_transform('stewart_base', target, time=drone_pose_msg.header.stamp, timeout=rospy.Duration(0.1))
+            self.t = self.tfBuffer.lookup_transform('stewart_base', target, time=rospy.Time(0.), timeout=rospy.Duration(0.1))
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException):
             rospy.logwarn('Manipulator setpoint tf dropped')
 
