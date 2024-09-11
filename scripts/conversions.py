@@ -54,11 +54,11 @@ def Array2ServoAnglesStamped(Theta, stamp):
         msg.Theta.append(np.rad2deg(Theta[i]))
     return msg
 
-def ServoAnglesStamped2Array(msg=ServoAnglesStamped()):
+def ServoAnglesStamped2Array(msg:ServoAnglesStamped):
     Theta = np.deg2rad(np.asarray(msg.Theta))
     return Theta
 
-def PoseStamped2Array(msg=PoseStamped()):
+def PoseStamped2Array(msg:PoseStamped):
     (theta, phi, psi) = euler_from_quaternion([msg.pose.orientation.x, 
                                                     msg.pose.orientation.y, 
                                                     msg.pose.orientation.z, 
@@ -66,14 +66,14 @@ def PoseStamped2Array(msg=PoseStamped()):
 
     return np.asarray([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z, theta, phi, psi]) 
 
-def TransformStamped2PoseStamped(msg=TransformStamped()):
+def TransformStamped2PoseStamped(msg:TransformStamped):
     pose_msg = PoseStamped()
     pose_msg.header = msg.header
     pose_msg.pose.position = msg.transform.translation
     pose_msg.pose.orientation = msg.transform.rotation
     return pose_msg
 
-def PoseStamped2TransformStamped(msg=PoseStamped(), child_frame_id=str()):
+def PoseStamped2TransformStamped(msg:PoseStamped, child_frame_id:str):
     tf_msg = TransformStamped()
     tf_msg.header = msg.header
     tf_msg.child_frame_id = child_frame_id

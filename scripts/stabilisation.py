@@ -95,20 +95,17 @@ class Stabilisation:
         tip_tf_msg = cvs.PoseStamped2TransformStamped(tip_pose_msg, child_frame_id='tooltip_sp_r')
         self.tfBroadcaster.sendTransform(tip_tf_msg)
 
-        rot = self.tfBuffer.lookup_transform('base_link', 'stewart_base', time=rospy.Time(0.), timeout=rospy.Duration(0.1))
-        flat_ref = self.tfBuffer.lookup_transform('map', 'platform_sp', time=rospy.Time(0.), timeout=rospy.Duration(0.1))      
-        flat_ref = make_flat_tooltip(flat_ref, rot)
-        self.tfBroadcaster.sendTransform(flat_ref)
-
-    # def tooltip_twist_callback(self, tip_vel_msg=TwistStamped()):
-    #     self.tip_vel_msg = tip_vel_msg
-    #     # this is currently unused :(
+        
 
     def drone_pose_callback(self, drone_pose_msg=PoseStamped()):
         drone_pose_flat = make_flat_drone(drone_pose_msg)
         drone_transform_flat = cvs.PoseStamped2TransformStamped(drone_pose_flat, child_frame_id='base_link_flat')
         self.tfBroadcaster.sendTransform(drone_transform_flat)
 
+        rot = self.tfBuffer.lookup_transform('base_link', 'stewart_base', time=rospy.Time(0.), timeout=rospy.Duration(0.1))
+        flat_ref = self.tfBuffer.lookup_transform('map', 'platform_sp', time=rospy.Time(0.), timeout=rospy.Duration(0.1))      
+        flat_ref = make_flat_tooltip(flat_ref, rot)
+        self.tfBroadcaster.sendTransform(flat_ref)
 
         if self.mavros_state == 'OFFBOARD':
             if self.tip_pose_msg.pose.position.z <= 0.0: #theres probably a better criterion for this 
