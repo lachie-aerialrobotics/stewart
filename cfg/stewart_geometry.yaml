@@ -6,6 +6,6 @@ platform_joint_spacing:    0.0375
 proximal_link_length:      0.12
 distal_link_length:        0.27069
 
-nozzle_length:             0.20
+nozzle_length:             0.10
 translation_limit:         0.12
 rotation_limit:            30
