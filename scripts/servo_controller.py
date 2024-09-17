@@ -109,8 +109,8 @@ def get_positions():
 
     return pos_measured
 
-def set_positions():
-    POS_SP = np.asarray(list(pos_sub.Theta))
+def set_positions(pos_msg):
+    POS_SP = np.asarray(list(pos_msg.Theta))
             
     for i in range(NUM_SERVOS):
         # Allocate goal position value into byte array
@@ -189,7 +189,7 @@ class ServoController:
         self.config = config
         return config
 
-    def pos_sp_callback(self, pos_sub):
+    def pos_sp_callback(self, pos_msg):
                
         if self.config.read_positions:
             pos_measured = get_positions()
@@ -202,7 +202,7 @@ class ServoController:
 
 
         if not self.config.disable_movement:
-            set_positions()
+            set_positions(pos_msg)
 
     
 if __name__ == '__main__':
