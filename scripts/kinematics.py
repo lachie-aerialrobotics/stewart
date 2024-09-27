@@ -128,3 +128,29 @@ class Kinematics:
     def DefineHomePos(self):
         Qhome = self.FPK(np.zeros(6), np.asarray([0,0,self.rs,0,0,0]))
         return Qhome
+    
+
+    def IPK_extended(self, Q): 
+        X = Q[0:3]
+        Theta = np.zeros(6)
+
+        wRp = self._get_platform_rotation_matrix(Q)
+
+        for i in range(6):
+            #calculate distances from platform and base joints
+            p_w = X + np.matmul(wRp, self.p_p[i,:])
+            L_w = p_w - self.b_w[i,:]
+            rl = np.linalg.norm(L_w)
+            L = rl**2 - (self.rs**2 - self.ra**2)
+
+            #convert distances to servo angles
+            M = 2 * self.ra * p_w[2]
+            N = 2 * self.ra * (np.cos(self.beta[i]) * (p_w[0] - self.b_w[i,0]) + np.sin(self.beta[i]) * (p_w[1] - self.b_w[i,1]))
+            disc = L / np.sqrt(M**2 + N**2)
+
+            #check real solution exists -> disc must be in domain of arcsin(), {-1,1}
+            if (disc >= 1.0) or (disc <= -1.0):
+                Theta[i] = np.nan
+            else:
+                Theta[i] = np.arcsin(disc) - np.arctan(N / M)
+        return Theta
