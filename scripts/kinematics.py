@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy.optimize import fsolve
+from tf.transformations import euler_from_matrix
 
 class Kinematics:
     def __init__(self, rb, rp, sb, sp, ra, rs):
@@ -130,27 +131,51 @@ class Kinematics:
         return Qhome
     
 
-    def IPK_extended(self, Q): 
+    def CoMs(self, Q, Theta): 
         X = Q[0:3]
-        Theta = np.zeros(6)
-
         wRp = self._get_platform_rotation_matrix(Q)
+
+        proximal_CoM_state = np.zeros((6,6))
+        distal_CoM_state  = np.zeros((6,6))
 
         for i in range(6):
             #calculate distances from platform and base joints
             p_w = X + np.matmul(wRp, self.p_p[i,:])
-            L_w = p_w - self.b_w[i,:]
-            rl = np.linalg.norm(L_w)
-            L = rl**2 - (self.rs**2 - self.ra**2)
+            proximal_link = self.ra * np.asarray([np.cos(Theta[i]) * np.cos(self.beta[i]),  np.cos(Theta[i]) * np.sin(self.beta[i]), np.sin(Theta[i])])
+            proximal_CoM = 0.5 *  proximal_link + self.b_w[i]
+            elbow_joint = proximal_link + self.b_w[i]
+            wrist_joint = p_w
+            distal_link = wrist_joint - elbow_joint
+            distal_CoM = elbow_joint + 0.5 * distal_link
 
-            #convert distances to servo angles
-            M = 2 * self.ra * p_w[2]
-            N = 2 * self.ra * (np.cos(self.beta[i]) * (p_w[0] - self.b_w[i,0]) + np.sin(self.beta[i]) * (p_w[1] - self.b_w[i,1]))
-            disc = L / np.sqrt(M**2 + N**2)
+            proximal_angles = rotation_from_vector(proximal_link)
+            distal_angles = rotation_from_vector(distal_link)
 
-            #check real solution exists -> disc must be in domain of arcsin(), {-1,1}
-            if (disc >= 1.0) or (disc <= -1.0):
-                Theta[i] = np.nan
-            else:
-                Theta[i] = np.arcsin(disc) - np.arctan(N / M)
-        return Theta
+            proximal_CoM_state[i,:] = np.hstack((proximal_CoM, proximal_angles))
+            distal_CoM_state[i,:] = np.hstack((distal_CoM, distal_angles))
+
+        EE_CoM_state = Q
+
+        return EE_CoM_state, proximal_CoM_state, distal_CoM_state
+    
+    def inertial(self, mass, I, x_ddot):
+        M = np.eye(6)
+        M[0,0] = mass
+        M[1,1] = mass
+        M[2,2] = mass
+        M[3:6,3:6] = I
+        return np.matmul(M,x_ddot)
+    
+    def coriolis():
+        2 * M * np.cross(omega,v)
+
+
+    
+def rotation_from_vector(vec):
+    nx = vec[0]
+    ny = vec[1]
+    nz = vec[2]
+    R = np.asarray([[ny/np.sqrt(nx**2 + ny**2), nx*nz/np.sqrt(nx**2 + ny**2), nx],[-nx/np.sqrt(nx**2+ny**2), ny*nz / np.sqrt(nx**2 + ny**2), ny],[0,-np.sqrt(nx**2 + ny**2), nz]])
+    psi, theta, phi = euler_from_matrix(R)
+
+    return np.asarray([psi, theta, phi])

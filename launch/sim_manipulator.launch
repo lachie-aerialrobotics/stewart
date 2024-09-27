@@ -21,7 +21,7 @@
     <!-- <env name="GAZEBO_PLUGIN_PATH" value="${GAZEBO_PLUGIN_PATH}:$(find stewart)/gazebo/plugin/build" />
     <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find stewart)/gazebo/models" /> -->
 
-    <arg name="world" value="$(find stewart)/gazebo/world/stewart.world"/>
+    <!-- <arg name="world" value="$(find stewart)/gazebo/world/stewart.world"/>
 
     <arg name = "paused" default = "false"/>
     <arg name = "use_sim_time" default = "true"/>
@@ -38,10 +38,12 @@
       <arg name = "use_sim_time" value = "$(arg use_sim_time)" />
       <arg name = "headless" value = "$(arg headless)" />
       <arg name = "verbose" value = "$(arg verbose)" />
-    </include>
+    </include> -->
 
     <group if="$(arg viz)">
       <node type="rviz" name="rviz" pkg="rviz" args="-d $(find stewart)/rviz/ground_based.rviz"/>
   </group>
+
+  <node name="Dynamics" pkg="stewart" type="dynamics_node.py" required="true" output="screen"/>
 
 </launch>
