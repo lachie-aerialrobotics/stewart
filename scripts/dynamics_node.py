@@ -26,25 +26,40 @@ class DynamicsNode:
         EE_mass = 0.1
         proximal_mass = 0.1
         distal_mass = 0.1
+        wrist_mass = 0.05
+        elbow_mass = 0.05
         platform_height = 0.02
         distal_diameter = 0.01
         proximal_diameter = 0.03
+        self.t = rospy.Time.now()
+        self.Q = np.zeros(6)
 
-        linear_force_limit = 1
+        linear_force_limit = 0.1
+        self.limits = np.asarray([linear_force_limit, linear_force_limit, linear_force_limit, np.inf, np.inf, np.inf])
 
-        self.EE = cuboid(EE_mass, 2*rp, 2*rp, platform_height)
+        self.EE = solid_cylinder(EE_mass, rp, platform_height)
         self.proximal = []
         self.distal = []
+        self.elbow = []
+        self.wrist = []
         for i in range(6):
-            self.distal.append(cuboid(distal_mass, distal_diameter, distal_diameter, rs))
+            self.distal.append(shell_cylinder(distal_mass, distal_diameter, rs))
             self.proximal.append(cuboid(proximal_mass, proximal_diameter, proximal_diameter, ra))
+            self.elbow.append(point(elbow_mass))
+            self.wrist.append(point(wrist_mass))
 
         self.br = tf2_ros.TransformBroadcaster()
 
-        self.pub_ee_wrench = rospy.Publisher('/ee_wrench', WrenchStamped, queue_size=1, tcp_nodelay=True)
+        
         self.pub_total_wrench = rospy.Publisher('/total_wrench', WrenchStamped, queue_size=1, tcp_nodelay=True)
+
+        # self.pub_pose_limited = rospy.Publisher('/pose_limited', PoseStamped, queue_size=1, tcp_nodelay=True)
+
+        
         self.pub_proximal_wrench = []
         self.pub_distal_wrench = []
+        self.pub_ee_wrench = rospy.Publisher('/ee_wrench', WrenchStamped, queue_size=1, tcp_nodelay=True)
+
         for i in range(6):
             self.pub_proximal_wrench.append(rospy.Publisher('/proximal_wrench_'+str(i), WrenchStamped, queue_size=1, tcp_nodelay=True))
             self.pub_distal_wrench.append(rospy.Publisher('/distal_wrench_'+str(i), WrenchStamped, queue_size=1, tcp_nodelay=True))
@@ -61,34 +76,82 @@ class DynamicsNode:
 
     def dynamics_callback(self, pose_msg:PoseStamped): 
         Q = cvs.PoseStamped2Array(pose_msg)
+
+        # dt = (rospy.Time.now() - self.t).to_sec()
+        # self.t = rospy.Time.now()
+        # Q_dot = state_deriv(Q, self.Q, dt)
+        
+
+        total_F = self.dynamics(Q)
+
+        Q_limited = Q
+        while np.any((np.abs(total_F) - self.limits) > 0.):
+            print(np.abs(total_F) - self.limits)
+            rospy.logwarn("limited speed!")
+            Q_limited = self.Q + (Q_limited - self.Q)*0.5
+            total_F = self.dynamics(Q_limited)
+            
+        # self.Q = Q
+
+        self.publish_state_vector_as_tf(Q_limited, pose_msg.header.stamp, 'stewart_base', 'limited_pose')
+
+        self.publish_vector_as_wrench(total_F, pose_msg.header.stamp, 'stewart_base', self.pub_total_wrench)
+
+
+    def dynamics(self, Q):
         Theta = self.k.IPK(Q)
-        EE_CoM_state, proximal_CoM_state, distal_CoM_state, wrist_state, elbow_state  = self.k.CoMs(Q, Theta)
-
         if not np.any(np.isnan(Theta)):
-            self.publish_state_vector_as_tf(EE_CoM_state, pose_msg.header.stamp, 'stewart_base', 'ee_CoM')
-            for i in range(6):
-                self.publish_state_vector_as_tf(proximal_CoM_state[i], pose_msg.header.stamp, 'stewart_base', 'proximal_link_'+str(i)+'_CoM')
-                self.publish_state_vector_as_tf(distal_CoM_state[i], pose_msg.header.stamp, 'stewart_base', 'distal_link_'+str(i)+'_CoM')
-                self.publish_state_vector_as_tf(wrist_state[i], pose_msg.header.stamp, 'stewart_base', 'wrist_joint_'+str(i)+'_CoM')
-                self.publish_state_vector_as_tf(elbow_state[i], pose_msg.header.stamp, 'stewart_base', 'elbow_joint_'+str(i)+'_CoM')
-
-
+            EE_CoM_state, proximal_CoM_state, distal_CoM_state, wrist_state, elbow_state  = self.k.CoMs(Q, Theta)
             EE_F = self.EE.update(EE_CoM_state)
-            self.publish_vector_as_wrench(EE_F, pose_msg.header.stamp, 'stewart_base', self.pub_ee_wrench)
-
             total_F = EE_F
-
             for i in range(6):
                 proximal_F = self.proximal[i].update(proximal_CoM_state[i])
-                self.publish_vector_as_wrench(proximal_F, pose_msg.header.stamp, 'stewart_base', self.pub_proximal_wrench[i])
                 total_F += proximal_F
-
                 distal_F = self.distal[i].update(distal_CoM_state[i])
-                self.publish_vector_as_wrench(distal_F, pose_msg.header.stamp, 'stewart_base', self.pub_distal_wrench[i])
                 total_F += distal_F
+                elbow_F = self.elbow[i].update(elbow_state[i])
+                total_F += elbow_F
+                wrist_F = self.wrist[i].update(wrist_state[i])
+                total_F += wrist_F
+        else:
+            total_F = np.zeros(6)
+        return total_F
+    
+        # def dynamics_callback(self, pose_msg:PoseStamped): 
+        # Q = cvs.PoseStamped2Array(pose_msg)
+        # Theta = self.k.IPK(Q)
+        # EE_CoM_state, proximal_CoM_state, distal_CoM_state, wrist_state, elbow_state  = self.k.CoMs(Q, Theta)
+
+        # if not np.any(np.isnan(Theta)):
+        #     # self.publish_state_vector_as_tf(EE_CoM_state, pose_msg.header.stamp, 'stewart_base', 'ee_CoM')
+        #     # for i in range(6):
+        #     #     self.publish_state_vector_as_tf(proximal_CoM_state[i], pose_msg.header.stamp, 'stewart_base', 'proximal_link_'+str(i)+'_CoM')
+        #     #     self.publish_state_vector_as_tf(distal_CoM_state[i], pose_msg.header.stamp, 'stewart_base', 'distal_link_'+str(i)+'_CoM')
+        #     #     self.publish_state_vector_as_tf(wrist_state[i], pose_msg.header.stamp, 'stewart_base', 'wrist_joint_'+str(i)+'_CoM')
+        #     #     self.publish_state_vector_as_tf(elbow_state[i], pose_msg.header.stamp, 'stewart_base', 'elbow_joint_'+str(i)+'_CoM')
 
 
-            self.publish_vector_as_wrench(total_F, pose_msg.header.stamp, 'stewart_base', self.pub_total_wrench)
+        #     EE_F = self.EE.update(EE_CoM_state)
+        #     total_F = EE_F
+
+        #     # self.publish_vector_as_wrench(EE_F, pose_msg.header.stamp, 'stewart_base', self.pub_ee_wrench)
+
+            
+        #     for i in range(6):
+        #         proximal_F = self.proximal[i].update(proximal_CoM_state[i])
+        #         total_F += proximal_F
+        #         distal_F = self.distal[i].update(distal_CoM_state[i])
+        #         total_F += distal_F
+        #         elbow_F = self.elbow[i].update(elbow_state[i])
+        #         total_F += elbow_F
+        #         wrist_F = self.wrist[i].update(wrist_state[i])
+        #         wrist_F += wrist_F
+
+        #         # self.publish_vector_as_wrench(proximal_F, pose_msg.header.stamp, 'stewart_base', self.pub_proximal_wrench[i])
+        #         # self.publish_vector_as_wrench(distal_F, pose_msg.header.stamp, 'stewart_base', self.pub_distal_wrench[i])
+                
+
+        #     self.publish_vector_as_wrench(total_F, pose_msg.header.stamp, 'stewart_base', self.pub_total_wrench)
 
 
 
