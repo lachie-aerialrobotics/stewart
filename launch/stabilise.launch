@@ -23,4 +23,6 @@
 
     <node name="InverseKinematics" pkg="stewart" type="kinematics_node.py" required="true" output="screen"/>
     
+    <node name="Dynamics" pkg="stewart" type="dynamics_node.py" required="true" output="screen"/>
+    
 </launch>

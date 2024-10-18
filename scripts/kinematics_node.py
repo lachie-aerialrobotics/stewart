@@ -17,6 +17,7 @@ import kinematics
 import conversions as cvs
 from geometry_msgs.msg import PoseStamped, WrenchStamped
 from stewart.msg import ServoAnglesStamped
+from tf.transformations import quaternion_from_euler, quaternion_conjugate, quaternion_multiply
 # from scipy import signal
 
 # from dynamic_reconfigure.server import Server
@@ -69,6 +70,7 @@ class KinematicsNode:
 
         #init publishers and subscribers
         self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True)
+        self.pub_servo_vels = rospy.Publisher('/servo_setpoint/velocities', ServoAnglesStamped, queue_size=1, tcp_nodelay=True)
         self.pub_platform = rospy.Publisher('/platform_detected/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         # self.pub_force = rospy.Publisher('/platform_detected/wrench', WrenchStamped, queue_size=1, tcp_nodelay=True)
         self.pub_setpoint = rospy.Publisher('/platform_setpoint/compliant', PoseStamped, queue_size=1, tcp_nodelay=True)
@@ -78,15 +80,25 @@ class KinematicsNode:
         # rospy.Subscriber('/servo_detected/torques', ServoAnglesStamped, self.fs_callback, queue_size=1, tcp_nodelay=True)
 
     def ipk_callback(self, platform_pos=PoseStamped()): 
-        self.Q_sp = cvs.PoseStamped2Array(platform_pos)
-        if self.k.CheckLims(self.Q_sp, self.translation_limit, self.rotation_limit):
-            Theta = self.k.IPK(self.Q_sp)
+        Q_sp = cvs.PoseStamped2Array(platform_pos)
+        if self.k.CheckLims(Q_sp, self.translation_limit, self.rotation_limit):
+            Theta = self.k.IPK(Q_sp)
         else:
             Theta = np.nan * np.ones(6)
             rospy.logwarn('Manipulator workspace exceeded!')
 
         if not np.any(np.isnan(Theta)):
             self.pub_servo_angles.publish(cvs.Array2ServoAnglesStamped(Theta, platform_pos.header.stamp)) 
+
+        dt = (self.time - rospy.Time.now()).to_sec()
+        self.time = rospy.Time.now()
+        Qdot_sp = state_derivative(Q_sp, self.Q_sp, dt)
+        self.Q_sp = Q_sp
+
+        Theta_dot = self.k.IVK(Q_sp, Qdot_sp, Theta)
+
+        if not np.any(np.isnan(Theta_dot)):
+            self.pub_servo_vels.publish(cvs.Array2ServoAnglesStamped(Theta_dot, platform_pos.header.stamp))
 
     def fpk_callback(self, servo_angles=ServoAnglesStamped()):
         self.Theta = cvs.ServoAnglesStamped2Array(servo_angles)
@@ -166,6 +178,26 @@ class KinematicsNode:
     #     return config
 
 
+def state_derivative(x1, x0, dt):
+    xdot = np.zeros(6)
+    xdot[0:3] = (x1[0:3] - x0[0:3]) / dt
+    q1 = _euler_to_np_quaternion(x1[3:6])
+    q0 = _euler_to_np_quaternion(x0[3:6])
+    qdot = _quaternion_derivative(q1, q0, dt)
+    xdot[3:6] = _quaternions_to_angular_rate(qdot, q1)
+    return xdot
+
+def _euler_to_np_quaternion(angles):
+    x, y, z = angles
+    q = quaternion_from_euler(x, y, z) #yzx - pitch, yaw, roll
+    return np.asarray(q)
+
+def _quaternion_derivative(q1, q0, dt):
+    return (q1 - q0)/dt
+
+def _quaternions_to_angular_rate(dqdt, q):
+    w = 2 * quaternion_multiply(dqdt, quaternion_conjugate(q))
+    return np.asarray(w)[0:3]
 
 if __name__ == '__main__': #initialise node and run loop
     rospy.init_node('kinematics_node')
