@@ -79,10 +79,11 @@ class KinematicsNode:
 
     def ipk_callback(self, platform_pos=PoseStamped()): 
         self.Q_sp = cvs.PoseStamped2Array(platform_pos)
-        if self.k.CheckLims(self.Q_sp, self.translation_limit, self.rotation_limit):
-            Theta = self.k.IPK(self.Q_sp)
-        else:
-            Theta = np.nan * np.ones(6)
+
+        is_within_lims, self.Q_sp = self.k.CheckLims(self.Q_sp, self.translation_limit, self.rotation_limit)
+        Theta = self.k.IPK(self.Q_sp)
+        
+        if not is_within_lims:
             rospy.logwarn('Manipulator workspace exceeded!')
 
         if not np.any(np.isnan(Theta)):
