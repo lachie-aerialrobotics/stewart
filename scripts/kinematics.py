@@ -105,7 +105,8 @@ class Kinematics:
         # if np.any(np.abs(Q[0:3]) > translation_limit):
         is_within_lims = np.zeros(3)
         for i in range(3):
-            is_within_lims[i], Q[i] = _limcheck(Q[i], translation_limit)
+            print(Q[i])
+            is_within_lims[i], Q[i] = _limcheck(Q[i], translation_limit[i])
         
         if np.any(is_within_lims) == False:
             is_all_within_lims = False
@@ -118,7 +119,7 @@ class Kinematics:
         # if np.any(np.abs(Q[3:6]) > np.deg2rad(rotation_limit)):
         is_within_lims = np.zeros(3)
         for i in range(3):
-            is_within_lims[i], Q[i+3] = _limcheck(Q[i+3], rotation_limit)
+            is_within_lims[i], Q[i+3] = _limcheck(Q[i+3], rotation_limit[i])
         
         if np.any(is_within_lims) == False:
             is_all_within_lims = False
