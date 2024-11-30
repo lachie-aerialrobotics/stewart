@@ -170,7 +170,7 @@ def _limcheck(value, lim):
     if value > lim:
         value = lim
         is_within_lims = False
-    elif -value < lim:
+    elif -value < -lim:
         value = -lim
         is_within_lims = False
     else:
