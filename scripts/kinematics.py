@@ -86,47 +86,11 @@ class Kinematics:
         return Theta
     
     def CheckLims(self, Q, translation_limit, rotation_limit):
-        # if np.any(np.abs(Q[0:3]) > translation_limit) or np.any(np.abs(Q[3:6]) > np.deg2rad(rotation_limit)):
-        #     is_within_lims = False
-        # else:
-        #     is_within_lims = True
-
-        is_within_trans_lims, Q = self.CheckTransLims(Q, translation_limit)
-        is_within_rot_lims, Q = self.CheckTransLims(Q, rotation_limit)
-
-        if is_within_rot_lims and is_within_trans_lims:
-            is_within_lims = True
-        else:
+        if np.any(np.abs(Q[0:3]) > translation_limit) or np.any(np.abs(Q[3:6]) > np.deg2rad(rotation_limit)):
             is_within_lims = False
-
-        return is_within_lims, Q
-    
-    def CheckTransLims(self, Q, translation_limit):
-        # if np.any(np.abs(Q[0:3]) > translation_limit):
-        is_within_lims = np.zeros(3)
-        for i in range(3):
-            print(Q[i])
-            is_within_lims[i], Q[i] = _limcheck(Q[i], translation_limit[i])
-        
-        if np.any(is_within_lims) == False:
-            is_all_within_lims = False
         else:
-            is_all_within_lims = True
-        
-        return is_all_within_lims, Q
-
-    def CheckRotLims(self, Q, rotation_limit):
-        # if np.any(np.abs(Q[3:6]) > np.deg2rad(rotation_limit)):
-        is_within_lims = np.zeros(3)
-        for i in range(3):
-            is_within_lims[i], Q[i+3] = _limcheck(Q[i+3], rotation_limit[i])
-        
-        if np.any(is_within_lims) == False:
-            is_all_within_lims = False
-        else:
-            is_all_within_lims = True
-
-        return is_all_within_lims, Q
+            is_within_lims = True
+        return is_within_lims
             
     def IFS(self, Q, Theta, T):
         X = Q[0:3]
@@ -164,15 +128,3 @@ class Kinematics:
     def DefineHomePos(self):
         Qhome = self.FPK(np.zeros(6), np.asarray([0,0,self.rs,0,0,0]))
         return Qhome
-    
-
-def _limcheck(value, lim):
-    if value > lim:
-        value = lim
-        is_within_lims = False
-    elif -value < -lim:
-        value = -lim
-        is_within_lims = False
-    else:
-        is_within_lims = True
-    return is_within_lims, value
