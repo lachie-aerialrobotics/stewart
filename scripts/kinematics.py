@@ -126,5 +126,5 @@ class Kinematics:
         return Q
     
     def DefineHomePos(self):
-        Qhome = self.FPK(np.deg2rad(30.)*np.ones(6), np.asarray([0,0,self.rs,0,0,0]))
+        Qhome = self.FPK(np.deg2rad(15.)*np.ones(6), np.asarray([0,0,self.rs,0,0,0]))
         return Qhome
