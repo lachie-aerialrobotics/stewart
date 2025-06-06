@@ -1,6 +1,6 @@
 #dynamixel servo settings
 servo:
   rate: 200
-  port: /dev/ttyUSB1
+  port: /dev/ttyUSB0
   baud: 4000000
   num:  6
