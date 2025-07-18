@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='stewart_platform_fixed'>
+  
+      <include>
+        <uri>model://stewart_platform</uri>
+        <name>stewart_platform</name>
+        <pose>0 0 0.04  0 0 0</pose>
+      </include>
+
+      <joint name="world_joint" type="fixed">
+        <pose>0 0 0 0 0 0</pose>
+        <parent>world</parent>
+        <child>stewart_platform::link</child>
+      </joint>
+
+  </model>
+</sdf>
