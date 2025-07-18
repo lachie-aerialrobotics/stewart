@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/lachie/aam_ws/install/stewart_msgs/include/**",
+        "/home/lachie/aam_ws/install/stewart/include/**",
+        "/home/lachie/aam_ws/install/px4_ros_com/include/**",
+        "/home/lachie/aam_ws/install/px4_msgs/include/**",
+        "/home/lachie/aam_ws/install/px4/include/**",
+        "/home/lachie/aam_ws/install/mpc_msgs/include/**",
+        "/home/lachie/aam_ws/install/fast_lio/include/**",
+        "/home/lachie/aam_ws/install/livox_ros_driver2/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/lachie/aam_ws/src/FAST_LIO/include/**",
+        "/home/lachie/aam_ws/src/Livox-SDK2/include/**",
+        "/home/lachie/aam_ws/src/px4_ros_com/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
