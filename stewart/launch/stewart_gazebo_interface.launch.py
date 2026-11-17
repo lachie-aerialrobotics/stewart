@@ -1,3 +1,4 @@
+import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import (Node, SetParameter)
@@ -20,13 +21,19 @@ def generate_launch_description():
             "servo4/cmd" + "@std_msgs/msg/Float64" + "]gz.msgs.Double",
             "servo5/cmd" + "@std_msgs/msg/Float64" + "]gz.msgs.Double",
             "servo6/cmd" + "@std_msgs/msg/Float64" + "]gz.msgs.Double",
+            # servo feedback (second JointStatePublisher in stewart_platform.sdf)
+            "/stewart/servo_state" + "@sensor_msgs/msg/JointState" + "[gz.msgs.Model",
         ])
+
+    geometry_config = os.path.join(
+        get_package_share_directory("stewart"), "config", "stewart_geometry.yaml")
 
     kinematics = Node(
         package="stewart",
         executable="kinematics_node",
         name="kinematics_node",
         output="screen",
+        parameters=[geometry_config],
         arguments=[],
     )
 

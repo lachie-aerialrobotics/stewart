@@ -9,7 +9,7 @@ sl.declare_arg('robot', default_value='stewart_platform_fixed')
 def launch_setup():
 
     robot = sl.arg('robot')
-    sl.spawn_gz_model(name = robot, model_file = sl.find('gz_attach_links', robot + '.sdf'),
+    sl.spawn_gz_model(name = robot, model_file = sl.find('stewart', robot + '.sdf', 'models/' + robot),
                       spawn_args=[])
 
 

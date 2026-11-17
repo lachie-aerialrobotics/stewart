@@ -1,0 +1,12 @@
+# Manipulator geometry, ported from cfg/stewart_geometry.yaml on the ROS1 `main` branch.
+# These values match models/stewart_platform/stewart_platform.sdf.
+kinematics_node:
+  ros__parameters:
+    base_radius: 0.09
+    platform_radius: 0.05
+    base_joint_spacing: 0.0165
+    platform_joint_spacing: 0.0375
+    proximal_link_length: 0.12
+    distal_link_length: 0.27069
+    translation_limit: 0.12   # [m]
+    rotation_limit: 30.0      # [deg] (Kinematics.CheckLims converts with np.deg2rad)

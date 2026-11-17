@@ -205,7 +205,7 @@
       </ode>
     </physics>
 	</joint>
-  <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+  <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
       <parent_link>platform_link</parent_link>
       <child_model>stewart_platform</child_model>
       <child_link>platform_link_closing_1</child_link>
@@ -227,7 +227,7 @@
       </ode>
     </physics>
 	</joint>
-  <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+  <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
       <parent_link>platform_link</parent_link>
       <child_model>stewart_platform</child_model>
       <child_link>platform_link_closing_2</child_link>
@@ -249,7 +249,7 @@
       </ode>
     </physics>
 	</joint>
-  <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+  <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
       <parent_link>platform_link_closing_3</parent_link>
       <child_model>stewart_platform</child_model>
       <child_link>platform_link</child_link>
@@ -271,7 +271,7 @@
       </ode>
     </physics>
 	</joint>
-  <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+  <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
       <parent_link>platform_link</parent_link>
       <child_model>stewart_platform</child_model>
       <child_link>platform_link_closing_4</child_link>
@@ -293,7 +293,7 @@
       </ode>
     </physics>
 	</joint>
-  <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+  <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
       <parent_link>platform_link</parent_link>
       <child_model>stewart_platform</child_model>
       <child_link>platform_link_closing_5</child_link>
@@ -315,7 +315,7 @@
       </ode>
     </physics>
   </joint>
-  <plugin filename="libgz-sim-detachable-joint-system.so" name="gz::sim::systems::DetachableJoint">
+  <plugin filename="gz-sim-detachable-joint-system" name="gz::sim::systems::DetachableJoint">
       <parent_link>platform_link</parent_link>
       <child_model>stewart_platform</child_model>
       <child_link>platform_link_closing_6</child_link>
@@ -978,14 +978,14 @@
 <link name="platform_link_closing_1">
     <pose>0 0 0.23732941839520943 0 0 0</pose>
     <inertial>
-    <mass>1e-16</mass>
+    <mass>1e-3</mass>
     <inertia>
-      <ixx>9.333330000000002e-05</ixx>
+      <ixx>1e-8</ixx>
       <ixy>0.0</ixy>
       <ixz>0.0</ixz>
-      <iyy>9.333330000000002e-05</iyy>
+      <iyy>1e-8</iyy>
       <iyz>0.0</iyz>
-      <izz>2.0e-05</izz>
+      <izz>1e-8</izz>
     </inertia>
     </inertial>
 </link>
@@ -993,14 +993,14 @@
 <link name="platform_link_closing_2">
     <pose>0 0 0.23732941839520943 0 0 0</pose>
     <inertial>
-    <mass>1e-16</mass>
+    <mass>1e-3</mass>
     <inertia>
-      <ixx>9.333330000000002e-05</ixx>
+      <ixx>1e-8</ixx>
       <ixy>0.0</ixy>
       <ixz>0.0</ixz>
-      <iyy>9.333330000000002e-05</iyy>
+      <iyy>1e-8</iyy>
       <iyz>0.0</iyz>
-      <izz>2.0e-05</izz>
+      <izz>1e-8</izz>
     </inertia>
     </inertial>
 </link>
@@ -1008,14 +1008,14 @@
 <link name="platform_link_closing_3">
     <pose>0 0 0.23732941839520943 0 0 0</pose>
     <inertial>
-    <mass>1e-16</mass>
+    <mass>1e-3</mass>
     <inertia>
-      <ixx>9.333330000000002e-05</ixx>
+      <ixx>1e-8</ixx>
       <ixy>0.0</ixy>
       <ixz>0.0</ixz>
-      <iyy>9.333330000000002e-05</iyy>
+      <iyy>1e-8</iyy>
       <iyz>0.0</iyz>
-      <izz>2.0e-05</izz>
+      <izz>1e-8</izz>
     </inertia>
     </inertial>
 </link>
@@ -1023,14 +1023,14 @@
 <link name="platform_link_closing_4">
     <pose>0 0 0.23732941839520943 0 0 0</pose>
     <inertial>
-    <mass>1e-16</mass>
+    <mass>1e-3</mass>
     <inertia>
-      <ixx>9.333330000000002e-05</ixx>
+      <ixx>1e-8</ixx>
       <ixy>0.0</ixy>
       <ixz>0.0</ixz>
-      <iyy>9.333330000000002e-05</iyy>
+      <iyy>1e-8</iyy>
       <iyz>0.0</iyz>
-      <izz>2.0e-05</izz>
+      <izz>1e-8</izz>
     </inertia>
     </inertial>
 </link>
@@ -1038,14 +1038,14 @@
 <link name="platform_link_closing_5">
     <pose>0 0 0.23732941839520943 0 0 0</pose>
     <inertial>
-    <mass>1e-16</mass>
+    <mass>1e-3</mass>
     <inertia>
-      <ixx>9.333330000000002e-05</ixx>
+      <ixx>1e-8</ixx>
       <ixy>0.0</ixy>
       <ixz>0.0</ixz>
-      <iyy>9.333330000000002e-05</iyy>
+      <iyy>1e-8</iyy>
       <iyz>0.0</iyz>
-      <izz>2.0e-05</izz>
+      <izz>1e-8</izz>
     </inertia>
     </inertial>
 </link>
@@ -1053,74 +1053,93 @@
 <link name="platform_link_closing_6">
     <pose>0 0 0.23732941839520943 0 0 0</pose>
     <inertial>
-    <mass>1e-16</mass>
+    <mass>1e-3</mass>
     <inertia>
-      <ixx>9.333330000000002e-05</ixx>
+      <ixx>1e-8</ixx>
       <ixy>0.0</ixy>
       <ixz>0.0</ixz>
-      <iyy>9.333330000000002e-05</iyy>
+      <iyy>1e-8</iyy>
       <iyz>0.0</iyz>
-      <izz>2.0e-05</izz>
+      <izz>1e-8</izz>
     </inertia>
     </inertial>
 </link>
 
-<plugin filename="libignition-gazebo-joint-position-controller-system.so"
-    name="ignition::gazebo::systems::JointPositionController">
+<plugin filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>proximal_link_1_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <cmd_max>1</cmd_max>
-    <cmd_min>-1</cmd_min>
+    <!-- max servo speed [rad/s]: XL430-W250 no-load ~57 rpm = ~6 rad/s; adjust for your servos -->
+    <cmd_max>6.0</cmd_max>
+    <cmd_min>-6.0</cmd_min>
     <topic>servo1/cmd</topic>
 </plugin>
 
-<plugin filename="libignition-gazebo-joint-position-controller-system.so"
-    name="ignition::gazebo::systems::JointPositionController">
+<plugin filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>proximal_link_2_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <cmd_max>1</cmd_max>
-    <cmd_min>-1</cmd_min>
+    <!-- max servo speed [rad/s]: XL430-W250 no-load ~57 rpm = ~6 rad/s; adjust for your servos -->
+    <cmd_max>6.0</cmd_max>
+    <cmd_min>-6.0</cmd_min>
     <topic>servo2/cmd</topic>
 </plugin>
 
-<plugin filename="libignition-gazebo-joint-position-controller-system.so"
-    name="ignition::gazebo::systems::JointPositionController">
+<plugin filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>proximal_link_3_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <cmd_max>1</cmd_max>
-    <cmd_min>-1</cmd_min>
+    <!-- max servo speed [rad/s]: XL430-W250 no-load ~57 rpm = ~6 rad/s; adjust for your servos -->
+    <cmd_max>6.0</cmd_max>
+    <cmd_min>-6.0</cmd_min>
     <topic>servo3/cmd</topic>
 </plugin>
 
-<plugin filename="libignition-gazebo-joint-position-controller-system.so"
-    name="ignition::gazebo::systems::JointPositionController">
+<plugin filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>proximal_link_4_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <cmd_max>1</cmd_max>
-    <cmd_min>-1</cmd_min>
+    <!-- max servo speed [rad/s]: XL430-W250 no-load ~57 rpm = ~6 rad/s; adjust for your servos -->
+    <cmd_max>6.0</cmd_max>
+    <cmd_min>-6.0</cmd_min>
     <topic>servo4/cmd</topic>
 </plugin>
 
-<plugin filename="libignition-gazebo-joint-position-controller-system.so"
-    name="ignition::gazebo::systems::JointPositionController">
+<plugin filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>proximal_link_5_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <cmd_max>1</cmd_max>
-    <cmd_min>-1</cmd_min>
+    <!-- max servo speed [rad/s]: XL430-W250 no-load ~57 rpm = ~6 rad/s; adjust for your servos -->
+    <cmd_max>6.0</cmd_max>
+    <cmd_min>-6.0</cmd_min>
     <topic>servo5/cmd</topic>
 </plugin>
 
-<plugin filename="libignition-gazebo-joint-position-controller-system.so"
-    name="ignition::gazebo::systems::JointPositionController">
+<plugin filename="gz-sim-joint-position-controller-system"
+    name="gz::sim::systems::JointPositionController">
     <joint_name>proximal_link_6_joint</joint_name>
     <use_velocity_commands>true</use_velocity_commands>
-    <cmd_max>1</cmd_max>
-    <cmd_min>-1</cmd_min>
+    <!-- max servo speed [rad/s]: XL430-W250 no-load ~57 rpm = ~6 rad/s; adjust for your servos -->
+    <cmd_max>6.0</cmd_max>
+    <cmd_min>-6.0</cmd_min>
     <topic>servo6/cmd</topic>
 </plugin>
 
-<plugin filename="libignition-gazebo-joint-state-publisher-system.so"
-    name="ignition::gazebo::systems::JointStatePublisher"/>
+<plugin filename="gz-sim-joint-state-publisher-system"
+    name="gz::sim::systems::JointStatePublisher"/>
+
+<!-- Servo feedback for ROS: only the six actuated joints, on a fixed topic
+     (bridged to /stewart/servo_state and converted to /servo_detected/positions by msg_converter) -->
+<plugin filename="gz-sim-joint-state-publisher-system"
+    name="gz::sim::systems::JointStatePublisher">
+    <topic>stewart/servo_state</topic>
+    <joint_name>proximal_link_1_joint</joint_name>
+    <joint_name>proximal_link_2_joint</joint_name>
+    <joint_name>proximal_link_3_joint</joint_name>
+    <joint_name>proximal_link_4_joint</joint_name>
+    <joint_name>proximal_link_5_joint</joint_name>
+    <joint_name>proximal_link_6_joint</joint_name>
+</plugin>
 
 
 </model>
